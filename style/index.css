@@ -1,0 +1,63 @@
+* {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 1em;
+}
+
+html {
+    font-size: 100.01%;
+    height: 100%;
+}
+body {
+    font-size: 62.5%;
+    font-family: SANS-SERIF;
+    height:100%;
+    background: #fafafa;
+    color: #4A5147;
+}
+
+a {
+    color: #7F74C6;
+}
+a:hover {
+    color: #625A99;
+}
+
+.content {
+    width: 90%;
+    margin: 10px auto;
+    font-size: 1.4em;
+}
+
+.tableBlock {
+    max-height: 200px;
+    overflow: auto;
+    margin: 10px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table td,
+table th {
+    border: 1px silver solid;
+    padding: 3px;
+}
+
+.paginator span {
+    padding: 5px;
+    cursor: pointer;
+    -moz-user-select: -moz-none;
+    -o-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.paginator span.active {
+    color: red;
+}

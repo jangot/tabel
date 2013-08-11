@@ -1,12 +1,46 @@
 <!DOCTYPE html>
-<html ng-app>
+<html ng-app="table">
 <head>
     <title>Table</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <script type="text/javascript" src="js/lib/angular.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style/index.css" />
+    <!--<script type="text/javascript" src="js/lib/angular/angular.js"></script>-->
     <script type="text/javascript" src="load.js"></script>
 </head>
 <body>
-    <p ng-init=" name='World' ">Hello {{name}}!</p>
+    <div class="content" ng-controller="TableCtrl">
+
+        <div class="tableItem" >
+            <input type="text" ng-model="query" ng-change="search()">
+            <div class="tableBlock">
+                <table>
+                    <tr>
+                        <th ng-repeat="th in head" ng-click="table.sortColumn=$index">
+                            {{th.title}}
+                            <br>
+                            {{th.field}}
+                        </th>
+                    </tr>
+
+                    <tr ng-repeat="tr in currentItems">
+                        <td ng-repeat="td in tr">
+                            {{td}}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="paginator">
+                <span ng-click="prev()">prev</span>
+                <span
+                        ng-repeat="i in pages"
+                        ng-click="setPosition($index)"
+                        ng-class="{active: $index == currentPosition}"
+                        >{{$index + 1}} </span>
+                <span ng-click="next()">next</span>
+            </div>
+        </div>
+
+        <button ng-click="addTable('small')">Add</button>
+    </div>
 </body>
 </html>
