@@ -4,48 +4,62 @@
     <title>Table</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="style/index.css" />
-    <!--<script type="text/javascript" src="js/lib/angular/angular.js"></script>-->
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>-->
     <script type="text/javascript" src="load.js"></script>
 </head>
 <body>
-    <div class="content" ng-controller="TableCtrl">
 
-        <div class="tableItem" >
+<div class="content" ng-controller="RootCtrl">
+
+    <div ng-repeat="i in tables" ui-view="viewTable"></div>
+
+    <button ng-click="add()">Add table</button>
+</div>
+
+
+<script type="text/ng-template" id="/table.html">
+
+    <form class="tableItem" ng-controller="TableCtrl">
+        <div class="search">
             <input type="text" ng-model="query" ng-change="search()">
-            <div>
-                <label ng-repeat="(type, title) in types">
-                    <input type="radio" ng-model="selectedType" name="type" ng-click="load(type)"/> {{title}}
-                </label>
-            </div>
-            <div class="tableBlock">
-                <table>
-                    <tr>
-                        <th ng-repeat="th in head" ng-click="table.sortColumn=$index">
-                            {{th.title}}
-                            <br>
-                            {{th.field}}
-                        </th>
-                    </tr>
-
-                    <tr ng-repeat="tr in currentItems">
-                        <td ng-repeat="td in tr">
-                            {{td}}
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <div class="paginator">
-                <span ng-click="prev()">prev</span>
-                <span
-                        ng-repeat="i in pages"
-                        ng-click="setPosition($index)"
-                        ng-class="{active: $index == currentPosition}"
-                        >{{$index + 1}} </span>
-                <span ng-click="next()">next</span>
-            </div>
         </div>
+        <div class="selectType">
+            <label ng-repeat="(type, title) in types">
+                <input type="radio" ng-model="selectedType" name="type" ng-click="load(type)"/> {{title}}
+            </label>
+        </div>
+        <div class="tableBlock">
+            <table>
+                <tr>
+                    <th ng-repeat="th in head" ng-click="sort($index)" ng-class="{currentSort: $index == sortBy}">
+                        <span>{{th.title}}</span>
+                        <span class="revers">{{sortRevers | revers}}</span>
+                    </th>
+                </tr>
 
-        <button ng-click="addTable('small')">Add</button>
-    </div>
+                <tr ng-repeat="tr in currentItems" ng-click="selectItem(tr)">
+                    <td ng-repeat="td in tr">
+                        {{td}}
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <ul>
+                <li ng-repeat="column in selectedItem">{{head[$index].title}} : {{column}}</li>
+            </ul>
+        </div>
+        <div class="paginator">
+            <span ng-click="prev()">prev</span>
+            <span
+                    ng-repeat="i in pages"
+                    ng-click="setPosition($index)"
+                    ng-class="{active: $index == currentPosition}"
+                    >{{$index + 1}} </span>
+            <span ng-click="next()">next</span>
+        </div>
+    </form>
+    <hr/>
+</script>
 </body>
 </html>

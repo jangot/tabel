@@ -32,6 +32,15 @@ a:hover {
     font-size: 1.4em;
 }
 
+.tableItem {
+    margin: 40px 0 20px;
+}
+
+.search {
+    padding-left: 5px;
+    margin-bottom: 20px;
+}
+
 .tableBlock {
     max-height: 200px;
     overflow: auto;
@@ -40,12 +49,39 @@ a:hover {
 
 table {
     border-collapse: collapse;
+    width: 100%;
+}
+
+table tr:hover td {
+    background: antiquewhite;
 }
 
 table td,
 table th {
     border: 1px silver solid;
     padding: 3px;
+    text-align: left;
+    cursor : pointer;
+    -moz-user-select: -moz-none;
+    -o-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+table th.currentSort span {
+    color: red;
+}
+
+table th span.revers {
+    display: none;
+}
+table th.currentSort span.revers {
+    display: inline;
+}
+
+ul {
+    padding: 20px 10px;
 }
 
 .paginator span {
@@ -60,4 +96,8 @@ table th {
 
 .paginator span.active {
     color: red;
+}
+
+button {
+    padding: 5px 10px;
 }

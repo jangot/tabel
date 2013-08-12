@@ -1,21 +1,104 @@
 "use strict";
 
+function RootCtrl($scope) {
+    $scope.tables = [1];
 
+    $scope.add = function() {
+        $scope.tables.push(1);
+    }
+}
 
 function TableCtrl($scope, $http, $filter) {
+
+    var MAX_ITEMS = 50;
+    var SMALL_TYPE = 'small';
+    var LARGE_TYPE = 'large';
+    var THEIR_TYPE = 'their';
+    var DATA_URL = 'http://thethz.com/dataset.php?type=';
+    var BROKEN_FILE_MASSAGE = 'Broken file.'
+
+    /**
+     * Header columns
+     *
+     * @type {{object}}
+     */
     $scope.head = {};
+
+    /**
+     * All row in table
+     *
+     * @type {Array}
+     */
     $scope.body = [];
+
+    /**
+     * Showed row in table
+     *
+     * @type {Array}
+     */
     $scope.currentItems = [];
+
+    /**
+     * Search string
+     * @type {string}
+     */
     $scope.query = ''
+
+    /**
+     * Rows after filter
+     *
+     * @type {Array}
+     */
     $scope.filterItems = [];
+
+    /**
+     * Current page position
+     *
+     * @type {number}
+     */
     $scope.currentPosition = 0;
-    $scope.maxItems = 50;
+
+    /**
+     * List of pages
+     *
+     * @type {Array}
+     */
     $scope.pages = [];
+
+    /**
+     * File types
+     * 
+     * @type {{object}}
+     */
+    $scope.types = {};
+    $scope.types[SMALL_TYPE] = 'Small';
+    $scope.types[LARGE_TYPE] = 'Large';
+    $scope.types[THEIR_TYPE] = 'Their';
+
+    /**
+     * Sort column
+     *
+     * @type {index}
+     */
+    $scope.sortBy = null;
+
+    /**
+     * Revers sort
+     *
+     * @type {boolean}
+     */
+    $scope.sortRevers = false;
+    /**
+     * Selected file type
+     * 
+     * @type {string | null}
+     */
     $scope.selectedType = 'small';
-    $scope.types = {
-        small : 'Small',
-        large : 'Large',
-        their : 'Their'
+
+    $scope.selectedItem = null;
+
+    $scope.selectItem = function(item) {
+        $scope.selectedItem = item;
     }
 
     $scope.prev = function() {
@@ -24,20 +107,22 @@ function TableCtrl($scope, $http, $filter) {
             updateCurrentItems();
         }
     }
+
     $scope.next = function() {
         if ($scope.currentPosition < $scope.pages.length - 1) {
             $scope.currentPosition++;
             updateCurrentItems();
         }
     }
+
     $scope.setPosition = function(position) {
-        var maxPosition = $scope.filterItems.length / $scope.maxItems;
+        var maxPosition = $scope.filterItems.length / MAX_ITEMS;
         if (position > maxPosition || position < 0) {
             return;
         }
         $scope.currentPosition = position;
         updateCurrentItems();
-    };
+    }
 
     $scope.search = function() {
         if ($scope.query) {
@@ -53,27 +138,52 @@ function TableCtrl($scope, $http, $filter) {
         if (!$scope.types[type]) {
             return;
         }
-        $scope.selectedType = type;
-        if (type == 'their') {
-            loadFile(function(data) {
+        if (type == THEIR_TYPE) {
+            loadFile(function(e, data) {
+                if (e) {
+                    alert(BROKEN_FILE_MASSAGE);
+                    return;
+                }
+                $scope.selectedType = type;
                 setData(data);
-                $scope.$apply()
+                $scope.$apply();
             });
         } else {
-            $http.get('http://thethz.com/dataset.php?type=' + type).success(function(data) {
+            $http.get(DATA_URL + type).success(function(data) {
+                $scope.selectedType = type;
                 setData(data);
             });
         }
     }
 
+    $scope.sort = function(index) {
+        if ($scope.sortBy == index) {
+            $scope.sortRevers = !$scope.sortRevers;
+        } else {
+            $scope.sortRevers = false;
+        }
+        $scope.sortBy = index;
 
+        $scope.body.sort(function(a, b) {
+            if (a[index] < b[index]) {
+                return $scope.sortRevers ? 1 : -1;
+            } else if (a[index] > b[index]) {
+                return $scope.sortRevers ? -1 : 1;
+            } else {
+                return 0;
+            }
+        });
+        $scope.search();
+    }
 
-     function setData(data) {
+    function setData(data) {
         $scope.head = data.shift();
         $scope.body = data;
         $scope.filterItems = data;
         $scope.currentPosition = 0;
         $scope.query = '';
+        $scope.sortBy = null;
+        $scope.selectedItem = null;
         updateCurrentItems();
     }
 
@@ -81,8 +191,8 @@ function TableCtrl($scope, $http, $filter) {
         var newCurrentItems = [];
         var items = $scope.filterItems;
 
-        var start = $scope.maxItems * $scope.currentPosition;
-        var finish = start + $scope.maxItems;
+        var start = MAX_ITEMS * $scope.currentPosition;
+        var finish = start + MAX_ITEMS;
         for (var i = start; i < finish; i++) {
             if (!items[i]) {
                 break;
@@ -90,7 +200,7 @@ function TableCtrl($scope, $http, $filter) {
             newCurrentItems.push(items[i]);
         }
         $scope.currentItems = newCurrentItems;
-        $scope.pages.length = Math.ceil(items.length / $scope.maxItems);
+        $scope.pages.length = Math.ceil(items.length / MAX_ITEMS);
     }
 
     function filterByString(items, query) {
@@ -103,13 +213,19 @@ function TableCtrl($scope, $http, $filter) {
             }
             return false;
         });
-    };
+    }
 
     function loadFile(cb) {
         var r = new FileReader();
         r.onload = function (oFREvent) {
             var text = oFREvent.target.result;
-            cb(JSON.parse(text))
+            try {
+                var data = JSON.parse(text);
+            } catch (e) {
+                cb(e)
+                return;
+            }
+            cb(null, data);
         };
 
         var fileSelector = document.createElement('input');

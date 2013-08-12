@@ -1,9 +1,5 @@
-angular.module('paginator', []).filter('list', function() {
+angular.module('tableFilters', []).filter('revers', function() {
     return function(input) {
-        var result = [];
-        for (var i = 0; i < input; i++) {
-            result.push(i)
-        }
-        return result;
+        return input ? '\u2B06' : '\u2B07';
     };
 });
