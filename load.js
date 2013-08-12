@@ -3,8 +3,7 @@ function sc(src) {
 }
 
 sc('lib/angular/angular');
-sc('lib/angular/angular-ui-router.min')
+sc('lib/angular/angular-ui-router.min');
 sc('filters');
 sc('app');
-sc('services')
 sc('controllers');

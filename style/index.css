@@ -42,8 +42,8 @@ a:hover {
 }
 
 .tableBlock {
-    max-height: 200px;
-    overflow: auto;
+    /*max-height: 400px;*/
+    /*overflow: auto;*/
     margin: 10px;
 }
 

@@ -15,7 +15,8 @@ function TableCtrl($scope, $http, $filter) {
     var LARGE_TYPE = 'large';
     var THEIR_TYPE = 'their';
     var DATA_URL = 'http://thethz.com/dataset.php?type=';
-    var BROKEN_FILE_MASSAGE = 'Broken file.'
+    var BROKEN_FILE_MESSAGE = 'Broken file.';
+    var BROKEN_DATA_MESSAGE = 'Broken data.';
 
     /**
      * Header columns
@@ -141,7 +142,7 @@ function TableCtrl($scope, $http, $filter) {
         if (type == THEIR_TYPE) {
             loadFile(function(e, data) {
                 if (e) {
-                    alert(BROKEN_FILE_MASSAGE);
+                    alert(BROKEN_FILE_MESSAGE);
                     return;
                 }
                 $scope.selectedType = type;
@@ -177,6 +178,12 @@ function TableCtrl($scope, $http, $filter) {
     }
 
     function setData(data) {
+        try {
+            checkAndNormalizeData(data);
+        } catch (e) {
+            alert(e.message);
+            return;
+        }
         $scope.head = data.shift();
         $scope.body = data;
         $scope.filterItems = data;
@@ -205,8 +212,10 @@ function TableCtrl($scope, $http, $filter) {
 
     function filterByString(items, query) {
         return $filter('filter')(items, function (item) {
+
             for(var attr in item) {
-                var search = item[attr].toLowerCase().indexOf(query.toLowerCase()) !== -1
+                var itemValue = item[attr].toString();
+                var search = itemValue.toLowerCase().indexOf(query.toLowerCase()) !== -1
                 if (search) {
                     return true;
                 }
@@ -217,8 +226,8 @@ function TableCtrl($scope, $http, $filter) {
 
     function loadFile(cb) {
         var r = new FileReader();
-        r.onload = function (oFREvent) {
-            var text = oFREvent.target.result;
+        r.onload = function (event) {
+            var text = event.target.result;
             try {
                 var data = JSON.parse(text);
             } catch (e) {
@@ -235,5 +244,28 @@ function TableCtrl($scope, $http, $filter) {
             r.readAsText(file);
         }
         fileSelector.click();
+    }
+
+    function checkAndNormalizeData(data) {
+        for (var i = 1; i < data.length; i++) {
+            if (data[i] instanceof Array) {
+                for (var j = 0; j < data[i].length; j++) {
+                    var numberValue = Number(data[i][j]);
+                    if (!isNaN(numberValue)) {
+                        data[i][j] = numberValue;
+                    }
+                }
+            } else {
+                throw Error(BROKEN_DATA_MESSAGE);
+            }
+        }
+        for (var i = 0; i < data[0].length; i++) {
+            var isObject = (data[0][i] instanceof Object);
+            if (!isObject) {
+                throw Error(BROKEN_DATA_MESSAGE);
+            }
+        }
+
+
     }
 }
