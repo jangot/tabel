@@ -17,6 +17,10 @@ function TableCtrl($scope, $http, $filter) {
     var DATA_URL = 'http://thethz.com/dataset.php?type=';
     var BROKEN_FILE_MESSAGE = 'Broken file.';
     var BROKEN_DATA_MESSAGE = 'Broken data.';
+    var BROKEN_DATA_ITEM_LENGTH = 'item length';
+
+    var HEAD_DATA_KEY_TITLE = 'title';
+    var HEAD_DATA_KEY_FIELD = 'field';
 
     /**
      * Header columns
@@ -179,7 +183,7 @@ function TableCtrl($scope, $http, $filter) {
 
     function setData(data) {
         try {
-            checkAndNormalizeData(data);
+            data = checkAndNormalizeData(data);
         } catch (e) {
             alert(e.message);
             return;
@@ -247,8 +251,28 @@ function TableCtrl($scope, $http, $filter) {
     }
 
     function checkAndNormalizeData(data) {
+        // Check head data
+        for (var i = 0; i < data[0].length; i++) {
+            var isObject = (data[0][i] instanceof Object);
+            if (!isObject) {
+                throw Error(BROKEN_DATA_MESSAGE);
+            }
+            if (!data[0][i][HEAD_DATA_KEY_TITLE]) {
+                throw Error(BROKEN_DATA_MESSAGE + '\n' + HEAD_DATA_KEY_TITLE);
+            }
+            if (!data[0][i][HEAD_DATA_KEY_FIELD]) {
+                throw Error(BROKEN_DATA_MESSAGE + '\n' + HEAD_DATA_KEY_FIELD);
+            }
+        }
+
+        // Check column data
+        var numColumn = data[0].length;
         for (var i = 1; i < data.length; i++) {
             if (data[i] instanceof Array) {
+                if (data[i].length !== numColumn) {
+                    throw Error(BROKEN_DATA_MESSAGE + '\n' + BROKEN_DATA_ITEM_LENGTH);
+                }
+                // Data to number if possible
                 for (var j = 0; j < data[i].length; j++) {
                     var numberValue = Number(data[i][j]);
                     if (!isNaN(numberValue)) {
@@ -259,13 +283,7 @@ function TableCtrl($scope, $http, $filter) {
                 throw Error(BROKEN_DATA_MESSAGE);
             }
         }
-        for (var i = 0; i < data[0].length; i++) {
-            var isObject = (data[0][i] instanceof Object);
-            if (!isObject) {
-                throw Error(BROKEN_DATA_MESSAGE);
-            }
-        }
 
-
+        return data;
     }
 }
